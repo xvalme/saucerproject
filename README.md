@@ -18,5 +18,4 @@ Thanks to `anime-offline-database` for the default database that we use in this 
 Thanks to `Anilist` and their API to get the character´s data.
 
 ## Main colaborators
-**xVal**, **milannzz** and **ae** are the current devs of the project.
-
+**xVal**, **milannzz** and **Aether** are the current devs of the project. 
