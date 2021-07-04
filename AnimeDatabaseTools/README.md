@@ -14,13 +14,14 @@ The json has this structure:
 | sources | ```URL[]``` |
 | title | ```String``` |
 
-Using the <database_updater.py> <database> <update_database> the .json gets also the following keys:
+Using the ```<database_updater.py> <database> <update_database>``` the .json gets also the following keys:
 
 **Anime**
-| Field | Type |
-| downloaded | ```Boolean```|  *If was already downloaded and added to the image database*
-| has_characters | ```Boolean```|  *If characters were found*
-| characters | ```String[]```|  *Name of characters in the show*
+| Field | Type | Explanation |
+| --- | --- |
+| downloaded | ```Boolean```|  *If was already downloaded and added to the image database* |
+| has_characters | ```Boolean```|  *If characters were found* |
+| characters | ```String[]```|  *Name of characters in the show* |
 
-To clean the database from anime entried without characters and delete useless keys, run <database_updater.py> <database> <clean_database>.
+To clean the database from anime entried without characters and delete useless keys, run ```<database_updater.py> <database> <clean_database>```.
 
