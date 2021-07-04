@@ -18,7 +18,7 @@ Using the ```<database_updater.py> <database> <update_database>``` the .json get
 
 **Anime**
 | Field | Type | Explanation |
-| --- | --- |
+| --- | --- | --- |
 | downloaded | ```Boolean```|  *If was already downloaded and added to the image database* |
 | has_characters | ```Boolean```|  *If characters were found* |
 | characters | ```String[]```|  *Name of characters in the show* |
