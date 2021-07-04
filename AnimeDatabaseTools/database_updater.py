@@ -20,6 +20,9 @@ def update_database(database='anime-offline-database.json'):
         data = json.load(anime_database)    #Importing databse
 
         iterations = 0
+        internet_fails = 0
+        start_time =  time.time()
+        time.sleep(0.0000000000001)  #Avoiding division by 0
         
         while iterations < len(data["data"]):    #Checking every source that exists
 
@@ -35,6 +38,7 @@ def update_database(database='anime-offline-database.json'):
                     
                     if characters == 'Connection Error':
                         time.sleep(10)   #Wait a bit and retry
+                        internet_fails += 1
                         characters = finding(id)
 
                     if characters == 'Not found' or characters == [] or characters == 'Connection Error': #no data = no characters
@@ -55,7 +59,14 @@ def update_database(database='anime-offline-database.json'):
                 data["data"][iterations]['characters'] = []
                 data["data"][iterations]['downloaded'] = False
                     
-            print("Completed update of " + str(iterations) + "/" + str(len(data['data'])), end='\r')
+            
+            print('''Completed update of %s/%s | Internet fails up now: %s | Velocity: %s characters/second'''
+            % (str(iterations),
+                str(len(data["data"])),
+                    internet_fails, 
+                        round(float(iterations)/float(time.time() - start_time), 3)
+                            ),
+            end='\r')
                                 
             iterations += 1
 
@@ -137,8 +148,10 @@ def finding(id):
     url = 'https://graphql.anilist.co'
 
     # Make the Api request
+    session = requests.Session()
+
     try:
-        response = requests.post(url, json={'query': query, 'variables': variables})
+        response = session.post(url, json={'query': query, 'variables': variables})
         
     except Exception:
         return 'Connection Error'
