@@ -1,6 +1,7 @@
 # Contents
-## anime-offline-database.json 
-It has the most popular anime. The json has this structure:
+## Database
+It has the most popular anime. It is the main database of the project.
+The json has this structure:
 
 **Root**
 | Field | Type |
@@ -12,21 +13,14 @@ It has the most popular anime. The json has this structure:
 | --- | --- |
 | sources | ```URL[]``` |
 | title | ```String``` |
-| type | ```Enum of [TV, MOVIE, OVA, ONA, SPECIAL, UNKNOWN]``` |
-| episodes | ```Integer``` |
-| status | ```Enum of [FINISHED, ONGOING, UPCOMING, UNKNOWN]``` |
-| animeSeason | ```AnimeSeason``` |
-| picture | ```URL``` |
-| thumbnail | ```URL``` |
-| synonyms | ```String[]``` |
-| relations | ```URL[]``` |
-| tags | ```String[]``` |
+
+Using the <database_updater.py> <database> <update_database> the .json gets also the following keys:
+
+**Anime**
+| Field | Type |
 | downloaded | ```Boolean```|  *If was already downloaded and added to the image database*
 | has_characters | ```Boolean```|  *If characters were found*
 | characters | ```String[]```|  *Name of characters in the show*
 
-## anilist_recognition.py 
-Queries Anilist API using graphql. Simply call ```finding(id)``` to get the corresponding characters of that anime ID.
+To clean the database from anime entried without characters and delete useless keys, run <database_updater.py> <database> <clean_database>.
 
-## charachter_finder.py 
-Given a .json database of anime, picks the corresponding Anilist page and adds new keys with charachters (that were picked up via the anilist_recognition.py) information.
