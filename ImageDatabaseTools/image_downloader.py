@@ -2,12 +2,11 @@ from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 import hashlib
 import os
-from datetime import datetime
 import multiprocessing
 import math
 import requests
-import time
 import json
+import datetime
 
 class image_downloader:
 
@@ -119,7 +118,7 @@ class image_downloader:
         urls = bing_links + urls
 
         downloaded_items = 0
-        
+
         if not os.path.isdir(dic):
                     
             raise Exception("No directory found.")
@@ -151,7 +150,7 @@ class image_downloader:
         
         return (name + '/')
 
-def main(database='AnimeDatabaseTools/anime-offline-database.json', workers = 2):
+def main(database='AnimeDatabaseTools/anime-offline-database.json', workers = 10):
 
     with open(database, 'r+',encoding='utf8') as anime_database:
 
@@ -164,15 +163,20 @@ def main(database='AnimeDatabaseTools/anime-offline-database.json', workers = 2)
  
         for job in range(workers):
 
-            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int(job+1*number_of_anime)],))
+            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int(job+1*number_of_anime)],job,))
             jobs.append(p1)
 
             p1.start()
 
-def json_to_character(data):
+def json_to_character(data, job):
     '''Given a json database it returns the characters for each anime'''
 
+    current_position = 0
+
     for anime in data:
+        current_position += 1
+
+        print('[%s] Worker %s: %s / %s' % (datetime.datetime.now().strftime("%H:%M:%S"), job+1, current_position, len(data)))
 
         for character in anime['characters']:
 
