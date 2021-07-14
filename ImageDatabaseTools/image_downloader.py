@@ -40,10 +40,6 @@ class image_downloader:
 
             #Error handling
 
-            if len(link_list) == 0:
-
-                raise Exception('Google did not find any images with that specification.')
-
             return link_list 
 
         except Exception as e:
@@ -96,12 +92,6 @@ class image_downloader:
                 if len(link_list) - link_list_verifier < 10:  #There is almost no new stuff
                     break
                  
-            #Error handling
-
-            if len(link_list) == 0:
-
-                raise Exception('Bing did not find any images with that specification.')
-
             return link_list 
 
         except Exception as e:
@@ -122,10 +112,6 @@ class image_downloader:
         if not os.path.isdir(dic):
                     
             raise Exception("No directory found.")
-
-        if len(urls) == 0:
-
-            raise Exception("No images returned for that query.")
 
         session = requests.Session()
 
@@ -150,7 +136,7 @@ class image_downloader:
         
         return (name + '/')
 
-def main(database='AnimeDatabaseTools/anime-offline-database.json', workers = 10):
+def main(database='anime-offline-database.json', workers = 1):
 
     with open(database, 'r+',encoding='utf8') as anime_database:
 
@@ -163,7 +149,7 @@ def main(database='AnimeDatabaseTools/anime-offline-database.json', workers = 10
  
         for job in range(workers):
 
-            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int(job+1*number_of_anime)],job,))
+            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int((job+1)*number_of_anime)],job,))
             jobs.append(p1)
 
             p1.start()
@@ -183,4 +169,4 @@ def json_to_character(data, job):
             image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']))
 
 if __name__ == '__main__':
-    main()
+    main(database='anime-offline-database.json', workers=10)
