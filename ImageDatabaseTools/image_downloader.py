@@ -99,7 +99,7 @@ class image_downloader:
 
             return []
 
-    def download_from_links(self, keywords, dic="data/"):
+    def download_from_links(self, keywords, source_id ,dic="data/"):
 
         urls = self.google_download_page(keywords)
         bing_links = self.bing_download_page(keywords)
@@ -115,7 +115,7 @@ class image_downloader:
         try:
             session = requests.Session()
             
-            dic = self.create_dic(dic=dic, keywords=keywords)
+            dic = self.create_dic(dic=dic, keywords=keywords, source_id=source_id)
 
             for url in urls:
 
@@ -133,8 +133,8 @@ class image_downloader:
         except Exception as e:
             print(e)
 
-    def create_dic(self, dic, keywords):
-        name = (dic + keywords)
+    def create_dic(self, dic, keywords, source_id):
+        name = (dic + source_id + '-' + keywords)
         name = name.replace('?', ' ')
         name = name.replace(':', ' ')
         name = name.replace('*', ' ')
@@ -232,10 +232,18 @@ def json_to_character(data, job):
         current_position += 1
 
         print('[%s] Worker %s: %s / %s' % (datetime.datetime.now().strftime("%H:%M:%S"), job+1, current_position, len(data)))
+        
+        source = 0
+        
+        for sourc in anime['sources']: #Getting ID of anime
+            if 'anilist.co' in sourc:
+                source = sourc.rsplit('/', 1)[-1]
+            else:
+                pass
 
         for character in anime['characters']:
 
-            image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']))
+            image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']), source_id=source)
 
 if __name__ == '__main__':
     main(database='anime-offline-database.json', workers=1)
