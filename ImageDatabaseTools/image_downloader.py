@@ -7,6 +7,7 @@ import math
 import requests
 import json
 import datetime
+import cv2
 
 class image_downloader:
 
@@ -100,8 +101,6 @@ class image_downloader:
 
     def download_from_links(self, keywords, dic="data/"):
 
-        dic = self.create_dic(dic=dic, keywords=keywords)
-
         urls = self.google_download_page(keywords)
         bing_links = self.bing_download_page(keywords)
 
@@ -111,18 +110,28 @@ class image_downloader:
 
         if not os.path.isdir(dic):
                     
-            raise Exception("No directory found.")
+            raise Exception("No main data directory found.")
 
-        session = requests.Session()
+        try:
+            session = requests.Session()
+            
+            dic = self.create_dic(dic=dic, keywords=keywords)
 
-        for url in urls:
+            for url in urls:
 
-            downloaded_items += 1
+                downloaded_items += 1
 
-            img_data = session.get(url).content   #Save with random hash
+                img_data = session.get(url).content   #Save with random hash
 
-            with open(dic + str(hashlib.md5(url.encode('utf-8')).hexdigest()+".png"), 'wb') as handler:
-                handler.write(img_data)
+                with open(dic + str(hashlib.md5(url.encode('utf-8')).hexdigest()+".png"), 'wb') as handler:
+                    handler.write(img_data)
+                    
+            #Running face_identifier right now to save memory
+            self.face_identifier(directory=dic)
+            self.face_reducer(directory=dic)
+
+        except Exception as e:
+            print(e)
 
     def create_dic(self, dic, keywords):
         name = (dic + keywords)
@@ -136,6 +145,67 @@ class image_downloader:
         
         return (name + '/')
 
+    def face_identifier(self, directory, cascade_file='lbpcascade_animeface.xml'):
+        '''Uses the cascade file to identify in each character directory the faces, and deletes the 
+        initial images.'''
+        
+        if not os.path.isfile(cascade_file):
+            raise RuntimeError("%s: not found" % cascade_file)
+        
+        cascade = cv2.CascadeClassifier(cascade_file)
+        files = []
+        
+        for (dirpath, dirnames, filenames) in os.walk(directory):
+            files.extend(filenames)
+            break
+        
+        for image_file in files:
+            image_file = directory + image_file
+            
+            image = cv2.imread(image_file)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray = cv2.equalizeHist(gray)
+            
+            faces = cascade.detectMultiScale(gray,
+                                            # detector options
+                                            scaleFactor = 1.1,
+                                            minNeighbors = 5,
+                                            minSize = (30, 30))
+            
+            face_num = 0
+            
+            for (x, y, w, h) in faces:
+                
+                face_num += 1
+                
+                crop_img = image[y:y+h, x:x+w]
+            
+                cv2.imwrite(
+                    str(image_file[:-4]) + '-' + str(face_num)+'.png',
+                    crop_img
+                )
+                
+            os.remove(image_file)
+        
+    def face_reducer(self, directory):
+        
+        files = []
+        
+        for (dirpath, dirnames, filenames) in os.walk(directory):
+            files.extend(filenames)
+            break
+        
+        for image_file in files:
+            image_file = directory + image_file
+            
+            image = cv2.imread(image_file)
+            resized_image = cv2.resize(image, (128, 128), interpolation=cv2.INTER_AREA)
+            
+            cv2.imwrite(
+                str(image_file),
+                resized_image
+            )
+        
 def main(database='anime-offline-database.json', workers = 1):
 
     with open(database, 'r+',encoding='utf8') as anime_database:
@@ -145,7 +215,6 @@ def main(database='anime-offline-database.json', workers = 1):
         jobs = []
 
         number_of_anime = math.modf(len(data['data'])/int(workers))[1]
-        rest = len(data["data"])-int(workers)*number_of_anime
  
         for job in range(workers):
 
@@ -169,4 +238,4 @@ def json_to_character(data, job):
             image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']))
 
 if __name__ == '__main__':
-    main(database='anime-offline-database.json', workers=10)
+    main(database='anime-offline-database.json', workers=1)
