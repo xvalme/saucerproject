@@ -47,7 +47,7 @@ class image_downloader:
 
             return [] 
 
-    def bing_download_page(self, keywords, limit=20):
+    def bing_download_page(self, keywords, limit=300):
 
         try:   
 
@@ -133,13 +133,13 @@ class image_downloader:
         self.face_identifier(directory=dic)
 
     def create_dic(self, dic, keywords, source_id):
+        keywords = keywords.replace('/', ' ')
         name = (dic + source_id + '-' + keywords)
         name = name.replace('?', ' ')
         name = name.replace(':', ' ')
         name = name.replace('*', ' ')
         name = name.replace('"', ' ')
         name = name.replace('|', ' ')
-        name = name.replace('/', ' ')
         name = name.replace(chr(92), ' ')
 
         os.makedirs(name)
@@ -193,7 +193,7 @@ class image_downloader:
         except Exception as e:
             print(e)
         
-def main(database='anime-offline-database.json', workers = 1):
+def main(database='anime-offline-database.json', workers = 1, start_position=0):
 
     with open(database, 'r+',encoding='utf8') as anime_database:
 
@@ -205,15 +205,13 @@ def main(database='anime-offline-database.json', workers = 1):
  
         for job in range(workers):
 
-            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int((job+1)*number_of_anime)],job,))
+            p1 = multiprocessing.Process(target=json_to_character, args=(data["data"][int(job*number_of_anime):int((job+1)*number_of_anime)],job,start_position,))
             jobs.append(p1)
 
             p1.start()
 
-def json_to_character(data, job):
+def json_to_character(data, job, current_position=0):
     '''Given a json database it returns the characters for each anime'''
-
-    current_position = 0
 
     for anime in data:
         current_position += 1
@@ -233,4 +231,4 @@ def json_to_character(data, job):
             image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']), source_id=source)
 
 if __name__ == '__main__':
-    main(database='anime-offline-database.json', workers=50)
+    main(database='anime-offline-database.json', workers=1, start_position=0)
