@@ -125,13 +125,12 @@ class image_downloader:
 
                 with open(dic + str(hashlib.md5(url.encode('utf-8')).hexdigest()+".png"), 'wb') as handler:
                     handler.write(img_data)
-                    
-            #Running face_identifier right now to save memory
-            self.face_identifier(directory=dic)
-            self.face_reducer(directory=dic)
 
         except Exception as e:
             print(e)
+            
+        #Running face_identifier right now to save memory
+        self.face_identifier(directory=dic)
 
     def create_dic(self, dic, keywords, source_id):
         name = (dic + source_id + '-' + keywords)
@@ -140,6 +139,8 @@ class image_downloader:
         name = name.replace('*', ' ')
         name = name.replace('"', ' ')
         name = name.replace('|', ' ')
+        name = name.replace('/', ' ')
+        name = name.replace(chr(92), ' ')
 
         os.makedirs(name)
         
@@ -159,52 +160,38 @@ class image_downloader:
             files.extend(filenames)
             break
         
-        for image_file in files:
-            image_file = directory + image_file
-            
-            image = cv2.imread(image_file)
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            gray = cv2.equalizeHist(gray)
-            
-            faces = cascade.detectMultiScale(gray,
-                                            # detector options
-                                            scaleFactor = 1.1,
-                                            minNeighbors = 5,
-                                            minSize = (30, 30))
-            
-            face_num = 0
-            
-            for (x, y, w, h) in faces:
+        try:
+            for image_file in files:
+                image_file = directory + image_file
                 
-                face_num += 1
+                image = cv2.imread(image_file)
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                gray = cv2.equalizeHist(gray)
                 
-                crop_img = image[y:y+h, x:x+w]
-            
-                cv2.imwrite(
-                    str(image_file[:-4]) + '-' + str(face_num)+'.png',
-                    crop_img
-                )
+                faces = cascade.detectMultiScale(gray,
+                                                # detector options
+                                                scaleFactor = 1.1,
+                                                minNeighbors = 5,
+                                                minSize = (30, 30))
                 
-            os.remove(image_file)
-        
-    def face_reducer(self, directory):
-        
-        files = []
-        
-        for (dirpath, dirnames, filenames) in os.walk(directory):
-            files.extend(filenames)
-            break
-        
-        for image_file in files:
-            image_file = directory + image_file
-            
-            image = cv2.imread(image_file)
-            resized_image = cv2.resize(image, (128, 128), interpolation=cv2.INTER_AREA)
-            
-            cv2.imwrite(
-                str(image_file),
-                resized_image
-            )
+                face_num = 0
+                
+                for (x, y, w, h) in faces:
+                    
+                    face_num += 1
+                    
+                    crop_img = image[y:y+h, x:x+w]
+                    resized_image = cv2.resize(crop_img, (128, 128), interpolation=cv2.INTER_AREA)
+                
+                    cv2.imwrite(
+                        str(image_file[:-4]) + '-' + str(face_num)+'.png',
+                        resized_image
+                    )
+                    
+                os.remove(image_file)
+                
+        except Exception as e:
+            print(e)
         
 def main(database='anime-offline-database.json', workers = 1):
 
@@ -246,4 +233,4 @@ def json_to_character(data, job):
             image_downloader().download_from_links(anime['title'] + ' ' + str(character['name']['full']), source_id=source)
 
 if __name__ == '__main__':
-    main(database='anime-offline-database.json', workers=1)
+    main(database='anime-offline-database.json', workers=50)
