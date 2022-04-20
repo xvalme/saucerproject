@@ -1,3 +1,6 @@
+# Note on develpment
+This project was abandoned before reaching anything. The scripts work with only 2 % of sucess when detecting any face, so further improvements need to be done, but life has moved on, so I stoped working on this.
+
 # Saucer AI Project
 Basicaly, this is a facial image recognition (it even finds the corresponding characters and anime!), but for anime characters.
 Given an input image, it searches for faces in it, then uses artificial intelligence to get the character as output.
@@ -15,7 +18,4 @@ Anyone interested just send a message so that we can discuss how to help, or jus
 ## Special Thanks
 This project would be 10x harder if these resources were not available:  
 Thanks to `anime-offline-database` for the default database that we use in this project.
-Thanks to `Anilist` and their API to get the character´s data.
-
-## Main colaborators
-**xVal**, **milannzz** and **Aether** are the current devs of the project. 
+Thanks to `Anilist` and their API to get the character´s data
